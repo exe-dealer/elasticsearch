@@ -320,14 +320,14 @@ public class DynamicTemplate implements ToXContentObject {
     private Map<String, Object> processMap(Map<String, Object> map, String name, String dynamicType) {
         Map<String, Object> processedMap = new HashMap<>();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey().replace("{name}", name).replace("{dynamic_type}", dynamicType).replace("{dynamicType}", dynamicType);
+            String key = processString(entry.getKey(), name, dynamicType);
             Object value = entry.getValue();
             if (value instanceof Map) {
                 value = processMap((Map<String, Object>) value, name, dynamicType);
             } else if (value instanceof List) {
                 value = processList((List) value, name, dynamicType);
             } else if (value instanceof String) {
-                value = value.toString().replace("{name}", name).replace("{dynamic_type}", dynamicType).replace("{dynamicType}", dynamicType);
+                value = processString(value.toString(), name, dynamicType);
             }
             processedMap.put(key, value);
         }
@@ -342,11 +342,19 @@ public class DynamicTemplate implements ToXContentObject {
             } else if (value instanceof List) {
                 value = processList((List) value, name, dynamicType);
             } else if (value instanceof String) {
-                value = value.toString().replace("{name}", name).replace("{dynamic_type}", dynamicType).replace("{dynamicType}", dynamicType);
+                value = processString(value.toString(), name, dynamicType);
             }
             processedList.add(value);
         }
         return processedList;
+    }
+
+    private String processString(String tmpl, String name, String dynamicType) {
+        return tmpl
+            .replace("{name}", name)
+            .replace("{name-3}", name.substring(0, name.length() - 3))
+            .replace("{dynamic_type}", dynamicType)
+            .replace("{dynamicType}", dynamicType);
     }
 
     @Override
